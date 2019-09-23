@@ -101,8 +101,8 @@ figure; imagesc(fitInfo.burstProb)
     fitInfo.burstProb...
     );
 
-fitInfo.b = b;
-fitInfo.s = s;
+fitInfo.bIndex = b;
+fitInfo.sIndex = s;
 
 clear b s
 %%
@@ -123,7 +123,8 @@ if(test==0)
     cd(saveDir);
     save(['trace_' dataset],...
         'smoothedFullTrace',...
-        'fitInfo');
+        'fitInfo',...
+        'corStruct');
 end
 
 
