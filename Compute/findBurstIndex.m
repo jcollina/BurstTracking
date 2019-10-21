@@ -1,11 +1,8 @@
-function [b, s, weirdos] = findBurstIndex(prb)
+function [burstIndex, weirdos] = findBurstIndex(prb)
 %% Find Burst Indices
 
-%prb = pr_b(:,(windowSize+1):end);
-
-%%
 stds = std(prb,[],2);
-weirdos = find(isoutlier(stds));
+weirdos = find(isoutlier(stds))';
 goods = setdiff(1:length(stds),weirdos);
 prb_g = prb(goods,:);
 
@@ -19,6 +16,7 @@ rmprb_g = round(mprb_g);
 shiftForward = [0 rmprb_g(1:(end-1))];
 
 pts = find((shiftForward - rmprb_g) == -1 );
+
 s = [];
 b = [];
 
@@ -40,6 +38,9 @@ if i > length(pts)
     break
 end
 end
+
+burstIndex = [s' b'];
+
 %{
 indexStruct = struct(...
     's',s,...
@@ -48,4 +49,3 @@ indexStruct = struct(...
     );
 %}
 end
-%save('burstIndices.mat', 'b', 's', 'weirdos');

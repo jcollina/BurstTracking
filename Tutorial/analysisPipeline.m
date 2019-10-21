@@ -26,7 +26,7 @@ chGrid = ogRecording.info.gridIndicies;
 % first n channels are used, where n is the number of active parallel
 % clusters.
 
-test = 0;
+test = 1;
 
 %% Find channels with NA and ignore them
 
@@ -56,62 +56,42 @@ if test == 1
     chidxT = chidxT(1:(2*pp.NumWorkers));
     tidx = tidx(1:10000);
 end
-%%
-[smoothedFullTrace,smoothTime] = applySmoothingFN(...
+%% Transforming meanSubFullTrace
+
+% Currently without padding, so will lose windowSize/2 on each end of trace
+
+smoothedFullTrace = applySmoothingFN(...
     meanSubFullTrace(chidxT,tidx),...
     stepSize,...
     windowSize...
     );
+
 % test success:
 %figure; imagesc(smoothedFullTrace);
 
 %% For each channel, fit a gaussian mixture model to classify bursts and suppressions
 
-% Full dataset will take between 15 and 30 minutes- 15 if the
-% classification runs well, and 30+ if every fit maxes out. That's why you
-% should make sure to run this after test = 1 first.
-
-% Parameters for mixture model:
-%
-% k:        How many clusters do you expect? Right now the code is only set up for
-%           two clusters.
-% maxIter:  How many fitting iterations before the function gives up?
-% minDist:  Minimum clustering distance (sometimes the function
-%           accidentally captures the same gaussian twice)
-%
-k = 2;
-maxIter = 1000;
-minDist = 0.5;
-
-fitInfo = applyFittingFN(...
-    smoothedFullTrace,...
-    k,...
-    maxIter,...
-    minDist...
-    );
+[postBurstProb,fitInfo] = mixModel(smoothedFullTrace);
 
 fitInfo.windowSize = windowSize;
 fitInfo.stepSize = stepSize;
-clear windowSize stepSize k maxIter minDist
+
+clear windowSize stepSize
+
 % test success:
-%figure; imagesc(fitInfo.burstProb)
+%figure; imagesc(postBurstProb)
 
 %% Using the fit results, find points of transition from burst to suppression
-[b,s] = findBurstIndex(...
-    fitInfo.burstProb...
-    );
+[fitInfo.burstIndex,fitInfo.weirdIndex] = findBurstIndex(postBurstProb);
 
-fitInfo.bIndex = b;
-fitInfo.sIndex = s;
-
-clear b s
 %%
-idx = 1:size(fitInfo.burstProb,2);
+datToCor = 1:size(postBurstProb,2); % Here, run correlation across all time points
 
-maxLag = 100;
+maxLag = 1000;
+
 corStruct = getCorStruct(...
-    pr_b800,...
-    idx,...
+    postBurstProb,...
+    datToCor,...
     maxLag...
     );
 
@@ -119,6 +99,7 @@ clear idx maxLag
 %%
 
 fitInfo.chGrid = chGrid;
+fitInfo.chidx = chidx;
 
 %% Save your data
 
@@ -126,6 +107,7 @@ if(test==0)
     cd(saveDir);
     save(['trace_' dataset],...
         'smoothedFullTrace',...
+        'postBurstProb',...
         'fitInfo',...
         'corStruct');
 end
@@ -147,55 +129,3 @@ parfor ii = 1:size(data,1)
 end
 smoothTime = toc(smoothStart);
 end
-%%
-
-function fitInfo = applyFittingFN(smoothedData,k,maxIter,minDist)
-numChan = size(smoothedData,1);
-r = zeros(1,numChan);
-bd = zeros(1,numChan);
-maxed = zeros(1,numChan);
-m = zeros(2,numChan);
-sd = zeros(2,numChan);
-burstProb = 1.1 + zeros(size(smoothedData));
-suppProb = burstProb;
-fitStart = tic;
-parfor i = 1:numChan
-    dataTemp = smoothedData(i,:);
-    zidx = find(dataTemp);
-    lend = length(dataTemp);
-    dataTemp = dataTemp(dataTemp ~= 0);
-    X = log10(dataTemp)';
-    r(i) = 0;
-    while r(i) < minDist
-        [mt,st,~,~,prt_t,r(i),bd(i),maxed(i)] = mixModel1D(X,k,maxIter);
-    end
-    prt = zeros(lend,2) + 0.5;
-    prt(zidx,:) = prt_t;
-    if mt(1) < mt(2)
-        idx = [1 2];
-        suppProb(i,:) = prt(:,1)';
-        burstProb(i,:) = prt(:,2)';
-    else
-        idx = [2 1];
-        suppProb(i,:) = prt(:,2)';
-        burstProb(i,:) = prt(:,1)';
-    end
-    m(:,i) = mt(idx);
-    sd(:,i) = st(idx);
-end
-fitTime = toc(fitStart);
-fitInfo = struct(...
-    'burstProb', burstProb, ...
-    'suppProb', suppProb, ...
-    'mu', m, ...
-    'std', sd, ...
-    'regDist', r, ...
-    'bhattDist', bd, ...
-    'iterNum', maxed, ...
-    'k', k, ...
-    'maxIter', maxIter, ...
-    'minDist', minDist, ...
-    'fitTime', fitTime ...
-    );
-end
-

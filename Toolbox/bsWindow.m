@@ -1,4 +1,4 @@
-function res = bsWindow(signal,varargin)%windowSize,step,plot,varargin)
+function res = bsWindow(signal,varargin)
 p = inputParser;
 p.StructExpand = false;
 p.addParameter('windowSize', 700, @isnumeric)
@@ -6,6 +6,7 @@ p.addParameter('step', 5, @isnumeric)
 p.addParameter('type','power',@ischar)
 p.addParameter('interpolate',true, @(x)((islogical(x))||(isempty(x))))
 p.addParameter('padding','none',@ischar)
+
 p.parse(varargin{:});
 windowSize = p.Results.windowSize;
 step = p.Results.step;
@@ -45,8 +46,6 @@ if step > 1 && interpolate
     res = interp1(1:len,res,query);
 end
 
-
-
 switch padding(1:3)
     case 'nan'
         pads = NaN(1,windowSize);
@@ -66,6 +65,5 @@ switch padding((length(padding)-3):length(padding))
     otherwise
         error("pad should be: front/nanfront, back/nanback, match/nanmatch or none")
 end
-
 
 end

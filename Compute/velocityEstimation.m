@@ -1,4 +1,4 @@
-function velocityStruct = velocityEstimation(data,gr,chidx,s,b)
+function velocityStruct = velocityEstimation(data,gr,chidx,s,b,weirdos)
 
 distMat = zeros(length(chidx));
 
@@ -29,7 +29,7 @@ result(cellfun(@isempty,result)) = {1000000};
 onsets = [cell2mat(result) [1:length(result)]'];
 
 temp = sortrows(onsets,1);
-onsetIndex = sortrows([temp (1:size(resM,1))'],2);
+onsetIndex = sortrows([temp (1:size(temp,1))'],2);
 
 onsetIndex(:,1) = onsetIndex(:,1) - min(onsetIndex(:,1));
 first_ch = find(onsetIndex(:,1)==0 , 1);
@@ -40,8 +40,9 @@ order(bidx,:) = onsetIndex(:,3);
 end
 
 orderedTimes = sort(times,2);
-wIdx = find(isoutlier(orderedTimes(:,4)));
-gIdx = setdiff(1:length(orderedTimes(:,4)),wIdx);
+delayedStartIdx = find(isoutlier(orderedTimes(:,4)));
+regularStartIdx = setdiff(1:length(orderedTimes(:,4)),delayedStartIdx);
+%badStartIdx = delayedStartIdx(ismember(order(1,delayedStartIdx),weirdos));
 
 dists(dists==0) = NaN;
 times(times>5000) = NaN;
@@ -50,9 +51,9 @@ velocityStruct = struct(...
     'times', times, ...
     'order', order, ...
     'dists', dists, ...
-    'wIdx', wIdx, ...
-    'gIdx', gIdx, ...
+    'delayedStartIdx', delayedStartIdx, ...
+    'regularStartIdx', regularStartIdx, ...
     'distMat', distMat ...
     );
-
+    %'badStartIdx', badStartIdx, ...
 end
