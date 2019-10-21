@@ -1,6 +1,6 @@
 function res = mixModel1D(X,k,maxIter)
 
-% Taken from: (cite source here)
+% Matthew Roughan (2009)
 
 % Set 'm' to the number of data points.
 m = size(X, 1);

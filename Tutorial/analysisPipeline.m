@@ -63,7 +63,7 @@ end
     windowSize...
     );
 % test success:
-figure; imagesc(smoothedFullTrace);
+%figure; imagesc(smoothedFullTrace);
 
 %% For each channel, fit a gaussian mixture model to classify bursts and suppressions
 
@@ -94,7 +94,7 @@ fitInfo.windowSize = windowSize;
 fitInfo.stepSize = stepSize;
 clear windowSize stepSize k maxIter minDist
 % test success:
-figure; imagesc(fitInfo.burstProb)
+%figure; imagesc(fitInfo.burstProb)
 
 %% Using the fit results, find points of transition from burst to suppression
 [b,s] = findBurstIndex(...
@@ -117,6 +117,9 @@ corStruct = getCorStruct(...
 
 clear idx maxLag
 %%
+
+fitInfo.chGrid = chGrid;
+
 %% Save your data
 
 if(test==0)
