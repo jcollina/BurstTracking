@@ -28,12 +28,9 @@ for ii = 1:length(chidx)
         data = data(randi(length(data),ceil(length(data)/10),1));
         X = log10(data)';
         
-        f.dist = 0;
-        while f.dist < 0.5
-            f = mixModel1D(X,k,maxIter);
-            sizeEffect(ii,jj) = f.dist;
-            iter(ii,jj) = f.iter;
-        end
+            [ ~ , f] = mixModel(X);
+            sizeEffect(ii,jj) = f.dPrime;
+            iter(ii,jj) = f.numIter;
         
         %{
     subplot(vertG,horzG,i)

@@ -11,7 +11,7 @@ saveDir = loadDir;
 dataset = '2018-12-20_18-31-00.mat';
 
 cd(loadDir);
-ogRecording = load(dataset);
+%ogRecording = load(dataset);
 
 meanSubFullTrace = ogRecording.meanSubFullTrace;
 chGrid = ogRecording.info.gridIndicies;
@@ -26,7 +26,7 @@ chGrid = ogRecording.info.gridIndicies;
 % first n channels are used, where n is the number of active parallel
 % clusters.
 
-test = 1;
+test = 0;
 
 %% Find channels with NA and ignore them
 
@@ -67,7 +67,7 @@ smoothedFullTrace = applySmoothingFN(...
     );
 
 % test success:
-%figure; imagesc(smoothedFullTrace);
+%figure(1); imagesc(smoothedFullTrace);
 
 %% For each channel, fit a gaussian mixture model to classify bursts and suppressions
 
@@ -79,7 +79,7 @@ fitInfo.stepSize = stepSize;
 clear windowSize stepSize
 
 % test success:
-%figure; imagesc(postBurstProb)
+%figure(2); imagesc(postBurstProb)
 
 %% Using the fit results, find points of transition from burst to suppression
 [fitInfo.burstIndex,fitInfo.weirdIndex] = findBurstIndex(postBurstProb);

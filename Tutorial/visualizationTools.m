@@ -1,8 +1,8 @@
 %% Visualization Tools
-load trace_2018-12-20_18-31-00.mat;
+%load trace_2018-12-20_18-31-00.mat;
 
 burstNumber = 7;
-traceToPlot = postBurstProb(:,fitInfo.burstIndex(burstNumber,:));
+traceToPlot = postBurstProb(:,fitInfo.burstIndex(burstNumber,1):fitInfo.burstIndex(burstNumber,2));
 
 %% Interactive Burst Plot
 interactivePlot(traceToPlot,chidx,chGrid)
@@ -14,7 +14,7 @@ movieFrames = burstMovie(name,traceToPlot,chidx,chGrid);
 %% From lagVector.m -->
 figure;
 quiver(...
-    vectorStruct.location(1,:),...
-    vectorStruct.location(2,:),...
+    vectorStruct.loc(1,:),...
+    vectorStruct.loc(2,:),...
     vectorStruct.vector(1,:),...
     vectorStruct.vector(2,:));
