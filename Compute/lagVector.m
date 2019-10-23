@@ -1,4 +1,4 @@
-function vectorStruct = lagVector(lagMat,chGrid,chidx)
+function vectorStruct = lagVector(lagMat,chidx,chGrid)
 
 transF = [-1 -1 ; -1 0 ; -1 1 ; 0 -1 ; 0 0 ; 0 1 ; 1 -1 ; 1 0 ; 1 1];
 

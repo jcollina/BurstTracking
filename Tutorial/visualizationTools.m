@@ -5,13 +5,29 @@ burstNumber = 7;
 traceToPlot = postBurstProb(:,fitInfo.burstIndex(burstNumber,1):fitInfo.burstIndex(burstNumber,2));
 
 %% Interactive Burst Plot
-interactivePlot(traceToPlot,chidx,chGrid)
+%
+% For a single burst, you can click through frames to watch how the burst
+% spreads across the cortex.
+
+interactivePlot(traceToPlot,fitInfo.chidx,fitInfo.chGrid)
 
 %% Movie of Burst Plot
-name = 'Test';
-movieFrames = burstMovie(name,traceToPlot,chidx,chGrid);
+%
+% For a single burst, you can create a movie (which will be saved
+% automatically under the name of your choice) to watch how the burst
+% spreads across the cortex.
 
-%% From lagVector.m -->
+name = 'Test';
+frameRate = 5; 
+movieFrames = burstMovie(name,frameRate,traceToPlot,fitInfo.chidx,fitInfo.chGrid);
+
+%% Using lagVector.m -->
+%
+% Input a #Channel x #Channel lag matrix, along with the channel grid
+% mapping and "good channel index", to get what is essentially an average
+% direction of burst propagation across each channel. 
+
+vectorStruct = lagVector(corStruct.lagMat,fitInfo.chidx,fitInfo.chGrid);
 figure;
 quiver(...
     vectorStruct.loc(1,:),...

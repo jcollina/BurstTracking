@@ -1,9 +1,9 @@
-function F = burstMovie(name,traceToPlot,chidx,chGrid)
+function F = burstMovie(name,frameRate,traceToPlot,chidx,chGrid)
 
 warning('off','MATLAB:audiovideo:VideoWriter:mp4FramePadded');
 
 v = VideoWriter(name,'MPEG-4');
-v.FrameRate = 5;
+v.FrameRate = frameRate;
 open(v);
 timeSpan = size(traceToPlot,2);
 noiseChan = find(isnan(mapChGrid(traceToPlot(:,1),chGrid,chidx)));
@@ -46,7 +46,7 @@ for j = 1:timeSpan
     an.String = ['Time: ',num2str(j),' ms'];
     orig_mode = get(f, 'PaperPositionMode');
     set(f, 'PaperPositionMode', 'auto');
-    cdata = print(f,'-RGBImage');%print(hfig, '-Dzbuffer', '-r0');
+    cdata = print(f,'-RGBImage');
     set(f, 'PaperPositionMode', orig_mode);
     F(j) = im2frame(cdata);
     writeVideo(v,F(j));
